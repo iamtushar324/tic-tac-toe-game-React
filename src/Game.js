@@ -70,15 +70,25 @@ class Square extends React.Component {
 
 class Board extends React.Component {
   
-updateValue = ([x,y]) =>{
+updateValue = async ([x,y]) =>{
   if(this.state.currentPlayer==2){return}
   if(this.state.arr[x][y]!=2){return}
   if(this.state.winner != 'None'){return}
 
   let tempArr = this.state.arr
   tempArr[x][y] = this.state.currentPlayer;
-this.setState({arr:tempArr , currentPlayer:this.state.currentPlayer==0 ? 1 :0})
-this.checkForWinner()
+  await this.setState({arr:tempArr , currentPlayer:this.state.currentPlayer==0 ? 1 :0})
+  let winner =  this.checkForWinner(tempArr)
+        if(winner == 1){
+        this.setState({winner:'X'})
+        }
+        if(winner == 0){
+        this.setState({winner:'O'})
+        }
+        
+  if(this.state.currentPlayer==0){
+  this.computerMove(tempArr)
+  }
 }
 
 reset = () =>{
@@ -86,11 +96,9 @@ reset = () =>{
   this.setState({arr:tempArr , currentPlayer:1 , winner:"None"})
 }
 
-checkForWinner =()=>{
+checkForWinner =(arr)=>{
   let x = false;
   let o = false;
-  let arr = this.state.arr
-
   for(let i = 0 ; i <= 2 ; i++){
     let xx = true;
     let oo = true;
@@ -98,8 +106,8 @@ checkForWinner =()=>{
       if(arr[i][j]!=0 ) oo=false;
       if(arr[i][j]!=1 ) xx=false;
      }
-    if(xx){this.setState({winner:"X"}); return }
-    if(oo){this.setState({winner:"O"}); return }
+    if(xx){return 1}
+    if(oo){return 0}
   }
   for(let i = 0 ; i <= 2 ; i++){
     let xx = true;
@@ -109,8 +117,8 @@ checkForWinner =()=>{
       if(arr[j][i]!=0 ) oo=false;
       if(arr[j][i]!=1 ) xx=false;
      }
-    if(xx){this.setState({winner:"X"}); return }
-    if(oo){this.setState({winner:"O"}); return }
+    if(xx){return 1}
+    if(oo){return 0}
   }
   
    let xx = true;
@@ -120,8 +128,8 @@ checkForWinner =()=>{
       if(arr[j][j]!=0 ) oo=false;
       if(arr[j][j]!=1 ) xx=false;
      }
-    if(xx){this.setState({winner:"X"}); return }
-    if(oo){this.setState({winner:"O"}); return }
+    if(xx){return 1}
+    if(oo){return 0}
   
     xx = true;
     oo = true;
@@ -131,15 +139,50 @@ checkForWinner =()=>{
       if(arr[j][2-j]!=0 ) oo=false;
       if(arr[j][2-j]!=1 ) xx=false;
      }
-    if(xx){this.setState({winner:"X"}); return }
-    if(oo){this.setState({winner:"O"}); return }
-
-
-
-
-
-
+    if(xx){return 1}
+    if(oo){return 0}
+    return -1
 }
+
+
+
+  computerMove = (arr)=>{
+        let currentPlayer = this.state.currentPlayer
+    let allPossibleOutcomesResult = [[-2,-2,-2],[-2,-2,-2],[-2,-2,-2]]
+    for(let row = 0 ; row < 3 ; row++){
+      for (let column = 0 ; column < 3 ; column++){
+        if(arr[row][column]==2){
+          let nextArr = [[...arr[0]],[...arr[1]],[...arr[2]]];
+          nextArr[row][column] = currentPlayer ? 0:1;
+          let checkForWinner = this.checkForWinner(nextArr)
+          if(checkForWinner==0){
+            allPossibleOutcomesResult[row][column] = 1
+          }
+          else if(checkForWinner==1){
+            allPossibleOutcomesResult[row][column] = 0
+          }
+          else {
+            allPossibleOutcomesResult[row][column] = -1;
+          }
+        }
+      }
+    }
+    let maxIndex = {row:0,column:0}
+
+    for(let row = 0 ; row < 3 ; row++){
+      for (let column = 0 ; column < 3 ; column++){
+          if(allPossibleOutcomesResult[row][column]>allPossibleOutcomesResult[maxIndex.row][maxIndex.column]){
+            maxIndex.row = row;
+            maxIndex.column = column;
+          }
+        }}
+        if(arr[maxIndex.row][maxIndex.column]== 2){
+        arr[maxIndex.row][maxIndex.column] = currentPlayer ? 1:0;
+        this.setState({arr:arr, currentPlayer:currentPlayer==0 ? 1 :0})
+      }
+
+        }
+
 
   constructor(props){
     super(props)
@@ -149,6 +192,7 @@ checkForWinner =()=>{
       winner:"None"
     }
   }
+  
   
   render() {
     return (
