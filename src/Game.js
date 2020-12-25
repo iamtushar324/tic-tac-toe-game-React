@@ -86,11 +86,12 @@ reset = () =>{
   this.setState({arr:tempArr , currentPlayer:1 , winner:"None"})
 }
 
-checkForWinner =()=>{
+checkForWinner =(arrProp)=>{
   let x = false;
   let o = false;
+        if(!arrProp){
   let arr = this.state.arr
-
+        }
   for(let i = 0 ; i <= 2 ; i++){
     let xx = true;
     let oo = true;
@@ -131,15 +132,47 @@ checkForWinner =()=>{
       if(arr[j][2-j]!=0 ) oo=false;
       if(arr[j][2-j]!=1 ) xx=false;
      }
-    if(xx){this.setState({winner:"X"}); return }
-    if(oo){this.setState({winner:"O"}); return }
+    if(xx){this.setState({winner:"X"}); return 1}
+    if(oo){this.setState({winner:"O"}); return 0}
+}
 
+  computerMove = (arr)=>{
+        if(isAllFilled(arr)){
+          if(checkForWinner(arr)==1){
+            return 1;
+          }
+          if(checkForWinner(arr)==0){
+            return -1
+          }
+          else {
+            return 0;
+          }
+        }
 
-
-
+        let allPossibleOutcomesResult = [[-2,-2,-2],[-2,-2,-2],[-2,-2,-2]]
+        for(let row = 0 ; row < 3 ; row++){
+        for (let column = 0 ; column < 3 ; column++){
+        if(arr[row][column]==2){
+          let nextArr = arr;
+          nextArr[row][column] = 0;
+          allPossibleOutcomesResult[row][column] = computerMove(nextArr);
+        }
+        }}
 
 
 }
+
+        isAllFilled = (arr)=>{
+        let yes = 1;
+        for(let row = 0 ; row < 3 ; row++){
+        for (let column = 0 ; column < 3 ; column++){
+        if(arr[row][column]==2){
+        return 0;
+        }
+        }
+        }
+        return 1;
+        }
 
   constructor(props){
     super(props)
